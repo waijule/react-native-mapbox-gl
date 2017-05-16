@@ -46,6 +46,7 @@
     /* So we don't fire onChangeUserTracking mode when triggered by props */
     BOOL _isChangingUserTracking;
     NSMutableArray<UIView *> *_reactSubviews;
+    MGLCoordinateBounds _visibleCoordinateBounds;
 }
 
 // View creation
@@ -97,6 +98,7 @@
     _map.showsUserLocation = _showsUserLocation;
     _map.styleURL = _styleURL;
     _map.zoomLevel = _initialZoomLevel;
+    _map.visibleCoordinateBounds = _visibleCoordinateBounds;
     _map.contentInset = _contentInset;
     [_map.attributionButton setHidden:_attributionButton];
     [_map.logoView setHidden:_logo];
@@ -505,6 +507,7 @@
 
 - (void)setVisibleCoordinateBounds:(MGLCoordinateBounds)bounds edgePadding:(UIEdgeInsets)padding animated:(BOOL)animated
 {
+    _visibleCoordinateBounds = bounds;
     [_map setVisibleCoordinateBounds:bounds edgePadding:padding animated:animated];
 }
 
