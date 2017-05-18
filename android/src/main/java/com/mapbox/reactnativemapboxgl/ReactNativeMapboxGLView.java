@@ -56,6 +56,7 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
     private boolean _paused = false;
 
     private CameraPosition.Builder _initialCamera = new CameraPosition.Builder();
+    private CameraUpdate _initialCameraUpdate = null;
     private MapboxMapOptions _mapOptions;
     private int _locationTrackingMode;
     private int _bearingTrackingMode;
@@ -155,7 +156,12 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
     @Override
     public void onMapReady(MapboxMap mapboxMap) {
         if (_mapView == null) { return; }
+
         _map = mapboxMap;
+
+        if (_initialCameraUpdate != null) {
+            _map.setCameraPosition(_initialCameraUpdate.getCameraPosition(_map));
+        }
 
         // Configure map
         _map.setMyLocationEnabled(_showsUserLocation);
@@ -621,6 +627,10 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
 
     @Override
     public void onMapChanged(int change) {
+        if (_map == null) {
+            return;
+        }
+
         switch (change) {
             case MapView.REGION_WILL_CHANGE:
             case MapView.REGION_WILL_CHANGE_ANIMATED:
@@ -694,6 +704,7 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
     public void setCameraPosition(CameraPosition position, int duration, @Nullable Runnable callback) {
         if (_map == null) {
             _initialCamera = new CameraPosition.Builder(position);
+            _initialCameraUpdate = null;
             if (callback != null) { callback.run(); }
             return;
         }
@@ -704,6 +715,8 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
 
     public void setCameraUpdate(CameraUpdate update, int duration, @Nullable Runnable callback) {
         if (_map == null) {
+            _initialCameraUpdate = update;
+            if (callback != null) { callback.run(); }
             return;
         }
 
