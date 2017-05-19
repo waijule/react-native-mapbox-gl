@@ -74,7 +74,7 @@
         return;
     }
 
-    _map = [[MGLMapView alloc] initWithFrame:self.bounds];
+    _map = [[MGLMapView alloc] initWithFrame:self.bounds styleURL:_styleURL];
     _map.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     _map.delegate = self;
 
@@ -98,8 +98,8 @@
     _map.showsUserLocation = _showsUserLocation;
     _map.styleURL = _styleURL;
     _map.zoomLevel = _initialZoomLevel;
-    _map.visibleCoordinateBounds = _visibleCoordinateBounds;
     _map.contentInset = _contentInset;
+    _map.visibleCoordinateBounds = _visibleCoordinateBounds;
     [_map.attributionButton setHidden:_attributionButton];
     [_map.logoView setHidden:_logo];
     [_map.compassView setHidden:_compass];
@@ -115,6 +115,8 @@
     for (UIView *annotation in _reactSubviews) {
         [_map addAnnotation:(RCTMapboxAnnotation *)annotation];
     }
+    
+    _onMapCreated(@{ @"target": self.reactTag });
 
     [self layoutSubviews];
 }

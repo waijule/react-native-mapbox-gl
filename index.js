@@ -174,6 +174,7 @@ class MapView extends Component {
     this._onStartLoadingMap = this._onStartLoadingMap.bind(this);
     this._onLocateUserFailed = this._onLocateUserFailed.bind(this);
     this._onNativeComponentMount = this._onNativeComponentMount.bind(this);
+    this._onMapCreated = this._onMapCreated.bind(this);
   }
 
   // Viewport setters
@@ -278,6 +279,9 @@ class MapView extends Component {
   _onLocateUserFailed(event: Event) {
     if (this.props.onLocateUserFailed) this.props.onLocateUserFailed(event.nativeEvent.src);
   }
+  _onMapCreated(event: Event) {
+    if (this.props.onMapCreated) this.props.onMapCreated(event.nativeEvent.src);
+  }
 
   static propTypes = {
     ...View.propTypes,
@@ -342,6 +346,7 @@ class MapView extends Component {
     onLongPress: PropTypes.func,
     onTap: PropTypes.func,
     onChangeUserTrackingMode: PropTypes.func,
+    onMapCreated: PropTypes.func,
   };
 
   static defaultProps = {
@@ -442,6 +447,7 @@ class MapView extends Component {
         onStartLoadingMap={this._onStartLoadingMap}
         onLocateUserFailed={this._onLocateUserFailed}
         onChangeUserTrackingMode={this._onChangeUserTrackingMode}
+        onMapCreated={this._onMapCreated}
       />
     );
   }
