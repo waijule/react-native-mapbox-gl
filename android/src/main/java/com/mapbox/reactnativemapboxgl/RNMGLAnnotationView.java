@@ -18,6 +18,7 @@ public class RNMGLAnnotationView extends ReactViewGroup {
 
     public RNMGLAnnotationView(Context context) {
         super(context);
+
         this.propertyListeners = new HashSet<>();
     }
 

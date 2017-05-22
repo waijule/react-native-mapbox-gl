@@ -47,8 +47,7 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
         MapboxMap.OnMyBearingTrackingModeChangeListener, MapboxMap.OnMyLocationTrackingModeChangeListener,
         MapboxMap.OnMyLocationChangeListener,
         MapboxMap.OnMarkerClickListener, MapboxMap.OnInfoWindowClickListener,
-        MapView.OnMapChangedListener, ReactNativeMapboxGLManager.ChildListener
-{
+        MapView.OnMapChangedListener, ReactNativeMapboxGLManager.ChildListener {
 
     private MapboxMap _map = null;
     private MapView _mapView = null;
@@ -85,6 +84,7 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
     private Map<RNMGLAnnotationView, RNMGLAnnotationView.PropertyListener> _propertyListeners = new HashMap<>();
 
     private Handler _handler;
+    private boolean _gestureInProgress = false;
 
 
     @UiThread
@@ -509,6 +509,26 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
         emitEvent(ReactNativeMapboxGLEventTypes.ON_UPDATE_USER_LOCATION, event);
     }
 
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        switch (ev.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                _gestureInProgress = true;
+                break;
+
+            case MotionEvent.ACTION_CANCEL:
+            case MotionEvent.ACTION_UP:
+                _gestureInProgress = false;
+                if (_enableOnRegionDidChange) {
+                    onRegionDidChange(false);
+                }
+
+                break;
+        }
+
+        return false;
+    }
+
     class TrackingModeChangeRunnable implements Runnable {
         ReactNativeMapboxGLView target;
         TrackingModeChangeRunnable(ReactNativeMapboxGLView target) {
@@ -587,7 +607,8 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
         if (_willChangeThrottled) {
             emitEvent(ReactNativeMapboxGLEventTypes.ON_REGION_WILL_CHANGE, serializeCurrentRegion(_changeWasAnimated));
         }
-        if (_didChangeThrottled) {
+
+        if (_didChangeThrottled && !_gestureInProgress) {
             emitEvent(ReactNativeMapboxGLEventTypes.ON_REGION_DID_CHANGE, serializeCurrentRegion(_changeWasAnimated));
         }
 
@@ -595,6 +616,7 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
             _recentlyChanged = true;
             _handler.postDelayed(new RegionChangedThrottleRunnable(this), 100);
         }
+
         _willChangeThrottled = false;
         _didChangeThrottled = false;
     }
@@ -621,7 +643,10 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
             _didChangeThrottled = true;
             _changeWasAnimated = animated;
         } else {
-            emitEvent(ReactNativeMapboxGLEventTypes.ON_REGION_DID_CHANGE, serializeCurrentRegion(animated));
+            if (!_gestureInProgress) {
+                emitEvent(ReactNativeMapboxGLEventTypes.ON_REGION_DID_CHANGE, serializeCurrentRegion(animated));
+            }
+
             _recentlyChanged = true;
             _handler.postDelayed(new RegionChangedThrottleRunnable(this), 100);
         }
