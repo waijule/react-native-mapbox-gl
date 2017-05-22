@@ -18,6 +18,7 @@ public class ReactNativeMapboxGLEventTypes {
     public static String ON_FINISH_LOADING_MAP = "mapbox.onFinishLoadingMap";
     public static String ON_START_LOADING_MAP = "mapbox.onStartLoadingMap";
     public static String ON_LOCATE_USER_FAILED = "mapbox.onLocateUserFailed";
+    public static String ON_MAP_CREATED = "mapbox.onMapCreated";
 
     private ReactNativeMapboxGLEventTypes() {}
 }

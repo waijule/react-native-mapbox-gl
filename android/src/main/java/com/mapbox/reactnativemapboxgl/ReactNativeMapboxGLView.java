@@ -215,6 +215,8 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
 
         _map.getMarkerViewManager().addMarkerViewAdapter(
                 new RNMGLCustomMarkerViewAdapter(getContext()));
+
+        emitEvent(ReactNativeMapboxGLEventTypes.ON_MAP_CREATED, null);
     }
 
     private void destroyMapView() {

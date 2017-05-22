@@ -101,6 +101,7 @@ public class ReactNativeMapboxGLManager extends ViewGroupManager<ReactNativeMapb
                 .put(ReactNativeMapboxGLEventTypes.ON_FINISH_LOADING_MAP, MapBuilder.of("registrationName", "onFinishLoadingMap"))
                 .put(ReactNativeMapboxGLEventTypes.ON_START_LOADING_MAP, MapBuilder.of("registrationName", "onStartLoadingMap"))
                 .put(ReactNativeMapboxGLEventTypes.ON_LOCATE_USER_FAILED, MapBuilder.of("registrationName", "onLocateUserFailed"))
+                .put(ReactNativeMapboxGLEventTypes.ON_MAP_CREATED, MapBuilder.of("registrationName", "onMapCreated"))
                 .build();
     }
 
