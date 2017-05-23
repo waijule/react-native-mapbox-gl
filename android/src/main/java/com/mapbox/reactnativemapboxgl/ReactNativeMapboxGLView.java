@@ -1,5 +1,6 @@
 package com.mapbox.reactnativemapboxgl;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.PointF;
 import android.hardware.GeomagneticField;
@@ -148,6 +149,7 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
 
     // Initialization
 
+    @SuppressLint("ResourceType")
     private void setupMapView() {
         _mapOptions.camera(_initialCamera.build());
         _mapView = new MapView(this.getContext(), _mapOptions);
