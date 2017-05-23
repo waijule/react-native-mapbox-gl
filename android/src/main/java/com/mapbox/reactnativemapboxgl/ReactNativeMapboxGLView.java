@@ -8,6 +8,7 @@ import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.UiThread;
 import android.view.MotionEvent;
+import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -51,6 +52,7 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
 
     private MapboxMap _map = null;
     private MapView _mapView = null;
+    private SurfaceView _surfaceView = null;
     private ReactNativeMapboxGLManager _manager;
     private boolean _paused = false;
 
@@ -63,6 +65,7 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
     private boolean _showsUserLocation;
     private boolean _annotationsPopUpEnabled = true;
     private boolean _zoomEnabled = true;
+    private boolean _zOrderTop = false;
     private double _minimumZoomLevel = 0;
     private double _maximumZoomLevel = 20;
     private boolean _pitchEnabled = true;
@@ -120,6 +123,7 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
             _mapView.onStop();
         }
         destroyMapView();
+        _surfaceView = null;
         _mapView = null;
     }
 
@@ -148,6 +152,8 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
         _mapOptions.camera(_initialCamera.build());
         _mapView = new MapView(this.getContext(), _mapOptions);
         _manager.addView(this, _mapView, 0);
+        _surfaceView = (SurfaceView) _mapView.findViewById(0x7f0f009f);
+        _surfaceView.setZOrderMediaOverlay(_zOrderTop);
         _mapView.addOnMapChangedListener(this);
         _mapView.onCreate(null);
         _mapView.getMapAsync(this);
@@ -313,6 +319,14 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
 
     public void setInitialCenterCoordinate(double lat, double lon) {
         _initialCamera.target(new LatLng(lat, lon));
+    }
+
+    public void setZOrderTop(boolean value) {
+        if (value == _zOrderTop) { return; }
+        _zOrderTop = value;
+        if (_surfaceView != null) {
+            _surfaceView.setZOrderMediaOverlay(value);
+        }
     }
 
     public void setEnableOnRegionDidChange(boolean value) {
