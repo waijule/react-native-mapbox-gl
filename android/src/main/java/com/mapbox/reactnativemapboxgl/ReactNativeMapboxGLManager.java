@@ -204,6 +204,11 @@ public class ReactNativeMapboxGLManager extends ViewGroupManager<ReactNativeMapb
         view.setZOrderTop(value);
     }
 
+    @ReactProp(name = "textureMode")
+    public void setTextureMode(ReactNativeMapboxGLView view, boolean value) {
+        view.setTextureMode(value);
+    }
+
     @ReactProp(name = "enableOnRegionDidChange")
     public void setEnableOnRegionDidChange(ReactNativeMapboxGLView view, boolean value) {
         view.setEnableOnRegionDidChange(value);

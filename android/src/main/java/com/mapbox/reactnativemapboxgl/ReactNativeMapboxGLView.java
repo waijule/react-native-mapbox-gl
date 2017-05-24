@@ -157,7 +157,10 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
         _mapView = new MapView(this.getContext(), _mapOptions);
         _manager.addView(this, _mapView, 0);
         _surfaceView = (SurfaceView) _mapView.findViewById(0x7f0f009f);
-        _surfaceView.setZOrderMediaOverlay(_zOrderTop);
+        if (_surfaceView != null) {
+            _surfaceView.setZOrderMediaOverlay(_zOrderTop);
+        }
+
         _mapView.addOnMapChangedListener(this);
         _mapView.onCreate(null);
         _mapView.getMapAsync(this);
@@ -331,6 +334,12 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
         if (_surfaceView != null) {
             _surfaceView.setZOrderMediaOverlay(value);
         }
+    }
+
+    public void setTextureMode(boolean value) {
+        if (value == _mapOptions.getTextureMode()) { return; }
+        _mapOptions.textureMode(value);
+        // there's no way to change this after map has been created so we don't set anything here
     }
 
     public void setEnableOnRegionDidChange(boolean value) {

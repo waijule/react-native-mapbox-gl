@@ -293,6 +293,7 @@ class MapView extends Component {
       longitude: PropTypes.number.isRequired
     }),
     zOrderTop: PropTypes.bool,
+    textureMode: PropTypes.bool,
     clipsToBounds: PropTypes.bool,
     debugActive: PropTypes.bool,
     rotateEnabled: PropTypes.bool,
@@ -360,6 +361,7 @@ class MapView extends Component {
     minimumZoomLevel: 0,
     maximumZoomLevel: 20, // default in native map view
     zOrderTop: false,
+    textureMode: false,
     debugActive: false,
     rotateEnabled: true,
     scrollEnabled: true,
