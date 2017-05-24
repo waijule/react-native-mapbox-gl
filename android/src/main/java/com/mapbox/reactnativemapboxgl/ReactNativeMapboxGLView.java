@@ -8,6 +8,7 @@ import android.location.Location;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.UiThread;
+import android.support.v4.view.MotionEventCompat;
 import android.view.MotionEvent;
 import android.view.SurfaceView;
 import android.view.View;
@@ -24,6 +25,7 @@ import com.facebook.react.uimanager.events.RCTEventEmitter;
 import com.mapbox.mapboxsdk.annotations.Annotation;
 import com.mapbox.mapboxsdk.annotations.Marker;
 import com.mapbox.mapboxsdk.annotations.MarkerView;
+import com.mapbox.mapboxsdk.annotations.MarkerViewManager;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdate;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
@@ -221,8 +223,8 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
 
         _annotationOptions.clear();
 
-        _map.getMarkerViewManager().addMarkerViewAdapter(
-                new RNMGLCustomMarkerViewAdapter(getContext()));
+        final MarkerViewManager markerViewManager = _map.getMarkerViewManager();
+        markerViewManager.addMarkerViewAdapter(new RNMGLCustomMarkerViewAdapter(getContext()));
 
         emitEvent(ReactNativeMapboxGLEventTypes.ON_MAP_CREATED, null);
     }
@@ -526,23 +528,38 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
     }
 
     @Override
-    public boolean onInterceptTouchEvent(MotionEvent ev) {
-        switch (ev.getAction()) {
-            case MotionEvent.ACTION_DOWN:
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        int action = MotionEventCompat.getActionMasked(ev);
+
+        switch (action) {
+            case (MotionEvent.ACTION_DOWN):
+                this.getParent().requestDisallowInterceptTouchEvent(
+                        _map != null && _map.getUiSettings().isScrollGesturesEnabled());
                 _gestureInProgress = true;
                 break;
 
-            case MotionEvent.ACTION_CANCEL:
-            case MotionEvent.ACTION_UP:
+            case (MotionEvent.ACTION_UP):
                 _gestureInProgress = false;
                 if (_enableOnRegionDidChange) {
                     onRegionDidChange(false);
                 }
-
+                // Clear this regardless, since isScrollGesturesEnabled() may have been updated
+                this.getParent().requestDisallowInterceptTouchEvent(false);
                 break;
         }
 
-        return false;
+        super.dispatchTouchEvent(ev);
+        return true;
+    }
+
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        return true;
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        return _mapView.onTouchEvent(event);
     }
 
     class TrackingModeChangeRunnable implements Runnable {
@@ -852,6 +869,18 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
             super(context);
         }
 
+        @Override
+        public boolean onSelect(@NonNull RNMGLCustomMarkerView marker, @NonNull View convertView, boolean reselectionFromRecycling) {
+            emitEvent(ReactNativeMapboxGLEventTypes.ON_OPEN_ANNOTATION, serializeMarker(marker));
+            return super.onSelect(marker, convertView, reselectionFromRecycling);
+        }
+
+        @Override
+        public void onDeselect(@NonNull RNMGLCustomMarkerView marker, @NonNull View convertView) {
+            emitEvent(ReactNativeMapboxGLEventTypes.ON_CLOSE_ANNOTATION, serializeMarker(marker));
+            super.onDeselect(marker, convertView);
+        }
+
         @Nullable
         @Override
         public View getView(@NonNull final RNMGLCustomMarkerView marker, @Nullable View convertView, @NonNull ViewGroup parent) {
@@ -873,13 +902,6 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
                 layout.removeAllViews();
             }
             reactView.setLayoutParams(viewGroupMeasurements);
-            reactView.setOnInterceptTouchEventListener(new OnInterceptTouchEventListener() {
-                @Override
-                public boolean onInterceptTouchEvent(ViewGroup v, MotionEvent event) {
-                    onMarkerClick(marker);
-                    return true;
-                }
-            });
             layout.setLayoutParams(frameLayoutMeasurements);
             layout.addView(reactView);
 

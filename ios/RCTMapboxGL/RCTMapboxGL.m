@@ -78,12 +78,9 @@
     _map.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     _map.delegate = self;
 
-    UILongPressGestureRecognizer *longPress = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(handleLongPress:)];
-    [self addGestureRecognizer:longPress];
-
-    UITapGestureRecognizer *singleTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleSingleTap:)];
-    singleTap.delegate = self;
-    [_map addGestureRecognizer:singleTap];
+    for (UIGestureRecognizer* gestureRecognizer in _map.gestureRecognizers) {
+        [self addGestureRecognizer:gestureRecognizer];
+    }
 
     _map.centerCoordinate = _initialCenterCoordinate;
     _map.clipsToBounds = _clipsToBounds;
@@ -115,7 +112,7 @@
     for (UIView *annotation in _reactSubviews) {
         [_map addAnnotation:(RCTMapboxAnnotation *)annotation];
     }
-    
+
     _onMapCreated(@{ @"target": self.reactTag });
 
     [self layoutSubviews];
@@ -123,7 +120,7 @@
 
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer
 {
-    return YES;
+    return NO;
 }
 
 - (void)layoutSubviews
@@ -136,6 +133,8 @@
 }
 
 // React subviews for custom annotation management
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wobjc-missing-super-calls"
 - (void)insertReactSubview:(id<RCTComponent>)subview atIndex:(NSInteger)atIndex {
     // Our desired API is to pass up markers/overlays as children to the mapview component.
     // This is where we intercept them and do the appropriate underlying mapview action.
@@ -146,7 +145,10 @@
         [_reactSubviews insertObject:annotation atIndex:atIndex];
     }
 }
+#pragma clang diagnostic pop
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wobjc-missing-super-calls"
 - (void)removeReactSubview:(id<RCTComponent>)subview {
     // similarly, when the children are being removed we have to do the appropriate
     // underlying mapview action here.
@@ -156,10 +158,14 @@
         [_reactSubviews removeObject:annotation];
     }
 }
+#pragma clang diagnostic pop
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wobjc-missing-super-calls"
 - (NSArray<id<RCTComponent>> *)reactSubviews {
     return _reactSubviews;
 }
+#pragma clang diagnostic pop
 
 
 
@@ -212,6 +218,9 @@
         }
     }
 }
+
+#pragma mark - MGLMapViewDelegate methods
+
 - (CGFloat)mapView:(MGLMapView *)mapView alphaForShapeAnnotation:(RCTMGLAnnotationPolyline *)shape
 {
     if ([shape isKindOfClass:[RCTMGLAnnotationPolyline class]]) {
@@ -310,6 +319,8 @@
 
     return annotationImage;
 }
+
+#pragma mark - React props
 
 // React props
 
@@ -604,35 +615,6 @@
                                       @"direction": @(_map.direction),
                                       @"pitch": @(_map.camera.pitch),
                                       @"animated": @(animated) } });
-}
-
-- (void)handleSingleTap:(UITapGestureRecognizer *)sender
-{
-    if (!_onTap) { return; }
-
-    CLLocationCoordinate2D location = [_map convertPoint:[sender locationInView:_map] toCoordinateFromView:_map];
-    CGPoint screenCoord = [sender locationInView:_map];
-
-    _onTap(@{ @"target": self.reactTag,
-              @"src": @{ @"latitude": @(location.latitude),
-                         @"longitude": @(location.longitude),
-                         @"screenCoordY": @(screenCoord.y),
-                         @"screenCoordX": @(screenCoord.x) } });
-}
-
-- (void)handleLongPress:(UITapGestureRecognizer *)sender
-{
-    if (!_onLongPress) { return; }
-    if (sender.state != UIGestureRecognizerStateBegan) { return; }
-
-    CLLocationCoordinate2D location = [_map convertPoint:[sender locationInView:_map] toCoordinateFromView:_map];
-    CGPoint screenCoord = [sender locationInView:_map];
-
-    _onLongPress(@{ @"target": self.reactTag,
-                    @"src": @{ @"latitude": @(location.latitude),
-                               @"longitude": @(location.longitude),
-                               @"screenCoordY": @(screenCoord.y),
-                               @"screenCoordX": @(screenCoord.x) } });
 }
 
 - (nonnull NSArray<id<MGLFeature>> *)visibleFeaturesAtPoint:(CGPoint)point
