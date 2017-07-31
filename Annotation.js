@@ -1,6 +1,7 @@
-import React, { PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React from 'react';
 import {
-  View,
+  ViewPropTypes,
   requireNativeComponent,
   StyleSheet,
   Platform,
@@ -19,7 +20,7 @@ const viewConfig = {
 };
 
 const propTypes = {
-  ...View.propTypes,
+  ...ViewPropTypes,
   id: PropTypes.string.isRequired,
   title: PropTypes.string,
   subtitle: PropTypes.string,
@@ -27,14 +28,14 @@ const propTypes = {
     latitude: PropTypes.number.isRequired,
     longitude: PropTypes.number.isRequired,
   }).isRequired,
-  
+
 };
 
 class MapboxAnnotation extends React.Component {
   setNativeProps(nativeProps) {
     this.marker.setNativeProps(nativeProps);
   }
-  
+
   render() {
     return (
       <RCTMapboxAnnotation
