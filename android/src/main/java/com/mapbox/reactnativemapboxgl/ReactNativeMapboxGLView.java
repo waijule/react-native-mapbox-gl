@@ -156,7 +156,7 @@ public class ReactNativeMapboxGLView extends RelativeLayout implements
         _mapOptions.camera(_initialCamera.build());
         _mapView = new MapView(this.getContext(), _mapOptions);
         _manager.addView(this, _mapView, 0);
-        _surfaceView = (SurfaceView) _mapView.findViewById(0x7f0f009f);
+        _surfaceView = (SurfaceView) _mapView.findViewById(R.id.surfaceView);
         if (_surfaceView != null) {
             _surfaceView.setZOrderMediaOverlay(_zOrderTop);
         }
